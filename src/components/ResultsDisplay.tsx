@@ -15,7 +15,7 @@ import html2canvas from 'html2canvas'
 interface ResultsDisplayProps {
   analysis: UserAnalysis
   onReset: () => void
-  onShowToast: (message: string) => void
+  onShowToast?: (message: string) => void
 }
 
 export function ResultsDisplay({ analysis, onReset, onShowToast }: ResultsDisplayProps) {
@@ -141,15 +141,15 @@ export function ResultsDisplay({ analysis, onReset, onShowToast }: ResultsDispla
           URL.revokeObjectURL(url)
           
           // Show toast notification immediately after download
-          onShowToast('Image downloaded successfully!')
+          onShowToast?.('Image downloaded successfully!')
         } else {
-          onShowToast('Failed to generate image')
+          onShowToast?.('Failed to generate image')
         }
       }, 'image/png', 0.95)
       
     } catch (error) {
       console.error('Error generating image:', error)
-      onShowToast('Error generating image')
+      onShowToast?.('Error generating image')
     } finally {
       setIsGeneratingImage(false)
     }
@@ -174,8 +174,6 @@ export function ResultsDisplay({ analysis, onReset, onShowToast }: ResultsDispla
         <ShareCard ref={shareCardRef} analysis={analysis} />
       </div>
 
-      {/* Toast Notification */}
-      
       <div className="w-full max-w-4xl mx-auto space-y-8 xs:space-y-12 sm:space-y-16 px-4 mb-12 component-container">
       {/* Header Section */}
       <div className="text-center space-y-6 xs:space-y-8 sm:space-y-12">
