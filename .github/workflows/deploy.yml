@@ -24,16 +24,19 @@ jobs:
       run: npm ci
       
     - name: 🔍 Run type check
-      run: npm run build
+      run: npx tsc --noEmit
       
     - name: 🧪 Run linting
       run: npm run lint
       
+    - name: 🏗️ Build project
+      run: npm run build
+      
     - name: 🚀 Deploy to Vercel
-      uses: amondnet/vercel-action@v25
+      uses: vercel/action@v1
       with:
         vercel-token: ${{ secrets.VERCEL_TOKEN }}
-        vercel-org-id: ${{ secrets.ORG_ID}}
-        vercel-project-id: ${{ secrets.PROJECT_ID}}
-        vercel-args: '--prod'
+        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        vercel-args: ${{ github.ref == 'refs/heads/main' && '--prod' || '' }}
         github-token: ${{ secrets.GITHUB_TOKEN }}
