@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { Check } from 'lucide-react'
+import { Check, X } from 'lucide-react'
 
 interface ToastProps {
   message: string
@@ -10,7 +10,7 @@ interface ToastProps {
   duration?: number
 }
 
-export function Toast({ message, isVisible, onClose, duration = 3000 }: ToastProps) {
+export function Toast({ message, isVisible, onClose, duration = 4000 }: ToastProps) {
   useEffect(() => {
     if (isVisible) {
       const timer = setTimeout(() => {
@@ -28,10 +28,19 @@ export function Toast({ message, isVisible, onClose, duration = 3000 }: ToastPro
   const bgColor = isError ? 'bg-red-600' : isDownload ? 'bg-blue-600' : 'bg-green-600'
 
   return (
-    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 animate-in slide-in-from-top-2 duration-300 px-4">
-      <div className={`${bgColor} text-white px-4 xs:px-6 py-2 xs:py-3 rounded shadow-lg flex items-center gap-2 xs:gap-3 max-w-sm`}>
+    <div 
+      className="toast-container animate-in slide-in-from-top-2 duration-300 px-4"
+    >
+      <div className={`${bgColor} text-white px-4 xs:px-6 py-3 xs:py-4 rounded-lg shadow-2xl flex items-center gap-2 xs:gap-3 max-w-sm border-2 border-white/20`}>
         <Check size={16} className="xs:w-5 xs:h-5 flex-shrink-0" />
-        <span className="font-medium text-sm xs:text-base">{message}</span>
+        <span className="font-semibold text-sm xs:text-base flex-1">{message}</span>
+        <button 
+          onClick={onClose}
+          className="ml-2 text-white/80 hover:text-white transition-colors p-1"
+          aria-label="Close notification"
+        >
+          <X size={14} className="xs:w-4 xs:h-4" />
+        </button>
       </div>
     </div>
   )

@@ -15,37 +15,36 @@ export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(
     return (
       <div 
         ref={ref}
-        className={`w-[640px] h-[640px] relative overflow-hidden ${className}`}
+        data-share-card="true"
+        className={`relative overflow-hidden no-scale ${className}`}
         style={{ 
-          background: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 25%, #dc2626 50%, #991b1b 75%, #1f2937 100%)',
+          width: '640px',
+          height: '640px',
+          minWidth: '640px',
+          minHeight: '640px',
+          maxWidth: '640px',
+          maxHeight: '640px',
           fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
           WebkitFontSmoothing: 'antialiased',
-          MozOsxFontSmoothing: 'grayscale'
+          MozOsxFontSmoothing: 'grayscale',
+          transform: 'none',
+          transformOrigin: 'initial',
+          boxSizing: 'border-box',
+          background: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 25%, #dc2626 50%, #991b1b 75%, #1f2937 100%)'
         }}
       >
-      {/* Background Pattern with Noise and Blur */}
-      <div className="absolute inset-0" style={{ opacity: 0.3 }}>
+        {/* Simplified background pattern for html2canvas compatibility */}
         <div 
           className="absolute inset-0" 
           style={{ 
+            opacity: 0.2,
             background: `
-              radial-gradient(circle at 20% 30%, rgba(255, 107, 53, 0.4) 0%, transparent 50%),
-              radial-gradient(circle at 80% 20%, rgba(247, 147, 30, 0.4) 0%, transparent 50%),
-              radial-gradient(circle at 40% 70%, rgba(220, 38, 38, 0.3) 0%, transparent 50%),
-              radial-gradient(circle at 90% 80%, rgba(153, 27, 27, 0.3) 0%, transparent 50%)
-            `,
-            filter: 'blur(1px)'
+              radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 40% 70%, rgba(0, 0, 0, 0.1) 0%, transparent 50%)
+            `
           }} 
         />
-        {/* Noise overlay */}
-        <div 
-          className="absolute inset-0"
-          style={{
-            background: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.1'/%3E%3C/svg%3E")`,
-            mixBlendMode: 'multiply'
-          }}
-        />
-      </div>
 
       {/* Content */}
       <div className="relative z-10 h-full text-center" style={{ padding: '60px 48px' }}>

@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import { getRolesByIds } from '@/config/roles'
 import { TwitterIcon } from '@/components/ui/twitter-icon'
 import { ShareCard } from '@/components/ui/share-card'
-import { Toast } from '@/components/ui/toast'
 import { 
   Copy,
   ExternalLink
@@ -16,15 +15,14 @@ import html2canvas from 'html2canvas'
 interface ResultsDisplayProps {
   analysis: UserAnalysis
   onReset: () => void
+  onShowToast: (message: string) => void
 }
 
-export function ResultsDisplay({ analysis, onReset }: ResultsDisplayProps) {
+export function ResultsDisplay({ analysis, onReset, onShowToast }: ResultsDisplayProps) {
   const { allocationResult, onChainMetrics, selectedRoles, eligibilityReasons } = analysis
   const userRoles = getRolesByIds(selectedRoles)
   const shareCardRef = useRef<HTMLDivElement>(null)
   const [isGeneratingImage, setIsGeneratingImage] = useState(false)
-  const [showToast, setShowToast] = useState(false)
-  const [toastMessage, setToastMessage] = useState('Image copied to clipboard!')
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -44,99 +42,114 @@ export function ResultsDisplay({ analysis, onReset }: ResultsDisplayProps) {
     return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
   }
 
-  const handleShareClick = () => {
-    if (isMobile()) {
-      // On mobile, open X profile instead of generating image
-      window.open('https://x.com/deepugami', '_blank')
-    } else {
-      // On desktop, generate and share image
-      generateAndShareImage()
-    }
-  }
-
-  const generateAndShareImage = async () => {
-    if (!shareCardRef.current || isGeneratingImage) return
+  const handleShareClick = async () => {
+    // Unified approach: generate and download image for all devices
+    await generateAndDownloadImage()
     
-    setIsGeneratingImage(true)
-    
-    try {
-      // Ensure window is focused before starting
-      window.focus()
-      
-      // Generate the image
-      const canvas = await html2canvas(shareCardRef.current, {
-        width: 640,
-        height: 640,
-        scale: 2,
-        backgroundColor: '#1f2937',
-        useCORS: true,
-        allowTaint: true,
-        scrollX: 0,
-        scrollY: 0,
-        ignoreElements: (element) => {
-          // Ignore elements that might cause issues
-          return element.tagName === 'SCRIPT' || element.tagName === 'STYLE'
-        }
-      })
-      
-      // Convert to blob and copy to clipboard (with fallback)
-      canvas.toBlob(async (blob) => {
-        if (blob) {
-          let clipboardSuccess = false
-          
-          // Try clipboard first (with focus and permission checks)
-          if (navigator.clipboard && window.ClipboardItem) {
-            try {
-              // Ensure window is focused
-              window.focus()
-              
-              // Add a small delay to ensure focus
-              await new Promise(resolve => setTimeout(resolve, 100))
-              
-              // Check if document has focus
-              if (document.hasFocus()) {
-                await navigator.clipboard.write([
-                  new ClipboardItem({ 'image/png': blob })
-                ])
-                clipboardSuccess = true
-                setToastMessage('Image copied to clipboard!')
-                setShowToast(true)
-              }
-            } catch (clipboardError) {
-              console.warn('Clipboard failed:', clipboardError)
-            }
-          }
-          
-          // Fallback to download if clipboard failed or not available
-          if (!clipboardSuccess) {
-            const url = URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = 'caldera-allocation.png'
-            a.style.display = 'none'
-            document.body.appendChild(a)
-            a.click()
-            document.body.removeChild(a)
-            URL.revokeObjectURL(url)
-            setToastMessage('Image downloaded!')
-            setShowToast(true)
-          }
-        }
-      }, 'image/png')
-      
-      // Open Twitter intent (with delay to show toast first)
-      setTimeout(() => {
+    // Then open sharing options based on device
+    setTimeout(() => {
+      if (isMobile()) {
+        // On mobile, open X profile
+        window.open('https://x.com/deepugami', '_blank')
+      } else {
+        // On desktop, open Twitter intent
         const twitterText = encodeURIComponent(
           "I just checked my Caldera allocation using this unofficial checker: https://deepu-caldera.vercel.app"
         )
         const twitterUrl = `https://twitter.com/intent/tweet?text=${twitterText}`
         window.open(twitterUrl, '_blank')
-      }, 1500)
+      }
+    }, 1000)
+  }
+
+  const generateAndDownloadImage = async () => {
+    if (!shareCardRef.current || isGeneratingImage) return
+    
+    setIsGeneratingImage(true)
+    
+    try {
+      // Keep the ShareCard hidden but accessible for capture
+      const container = shareCardRef.current.parentElement
+      if (container) {
+        // Position it off-screen but still in the DOM
+        container.style.position = 'fixed'
+        container.style.top = '-10000px'
+        container.style.left = '-10000px'
+        container.style.zIndex = '-1'
+        container.style.opacity = '1' // Make visible for html2canvas but keep off-screen
+        container.style.visibility = 'visible'
+        container.style.pointerEvents = 'none'
+        container.style.width = '640px'
+        container.style.height = '640px'
+      }
+
+      // Small delay to ensure rendering
+      await new Promise(resolve => setTimeout(resolve, 50))
+
+      // Generate the image with optimized settings
+      const canvas = await html2canvas(shareCardRef.current, {
+        width: 640,
+        height: 640,
+        scale: 2,
+        backgroundColor: null,
+        useCORS: true,
+        allowTaint: true,
+        foreignObjectRendering: false,
+        logging: false,
+        removeContainer: false,
+        imageTimeout: 15000,
+        scrollX: 0,
+        scrollY: 0,
+        x: 0,
+        y: 0,
+        onclone: (clonedDoc) => {
+          // Ensure proper sizing in cloned document
+          const clonedElement = clonedDoc.querySelector('[data-share-card]') as HTMLElement
+          if (clonedElement) {
+            clonedElement.style.width = '640px'
+            clonedElement.style.height = '640px'
+            clonedElement.style.minWidth = '640px'
+            clonedElement.style.minHeight = '640px'
+            clonedElement.style.maxWidth = '640px'
+            clonedElement.style.maxHeight = '640px'
+            clonedElement.style.transform = 'none'
+          }
+        }
+      })
+      
+      // Keep the element hidden after capture
+      if (container) {
+        container.style.opacity = '0'
+        container.style.visibility = 'hidden'
+        container.style.zIndex = '-1'
+        container.style.position = 'fixed'
+        container.style.top = '-10000px'
+        container.style.left = '-10000px'
+      }
+      
+      // Convert to blob and download
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `caldera-allocation-${Date.now()}.png`
+          a.style.display = 'none'
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          URL.revokeObjectURL(url)
+          
+          // Show toast notification immediately after download
+          onShowToast('Image downloaded successfully!')
+        } else {
+          onShowToast('Failed to generate image')
+        }
+      }, 'image/png', 0.95)
       
     } catch (error) {
       console.error('Error generating image:', error)
-      setToastMessage('Error generating image')
-      setShowToast(true)
+      onShowToast('Error generating image')
     } finally {
       setIsGeneratingImage(false)
     }
@@ -145,17 +158,24 @@ export function ResultsDisplay({ analysis, onReset }: ResultsDisplayProps) {
   return (
     <>
       {/* Hidden Share Card for Image Generation */}
-      <div className="fixed -top-[1000px] -left-[1000px] z-[-1]">
+      <div 
+        className="fixed pointer-events-none no-scale" 
+        style={{ 
+          top: '-10000px',
+          left: '-10000px',
+          zIndex: -1,
+          background: 'transparent',
+          opacity: 0,
+          visibility: 'hidden',
+          width: '640px',
+          height: '640px'
+        }}
+      >
         <ShareCard ref={shareCardRef} analysis={analysis} />
       </div>
 
       {/* Toast Notification */}
-      <Toast 
-        message={toastMessage} 
-        isVisible={showToast} 
-        onClose={() => setShowToast(false)} 
-      />
-
+      
       <div className="w-full max-w-4xl mx-auto space-y-8 xs:space-y-12 sm:space-y-16 px-4 mb-12 component-container">
       {/* Header Section */}
       <div className="text-center space-y-6 xs:space-y-8 sm:space-y-12">
