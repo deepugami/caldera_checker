@@ -38,6 +38,22 @@ export function ResultsDisplay({ analysis, onReset }: ResultsDisplayProps) {
     return `${address.slice(0, 6)}...${address.slice(-4)}`
   }
 
+  // Detect if user is on mobile device
+  const isMobile = () => {
+    if (typeof window === 'undefined') return false
+    return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  }
+
+  const handleShareClick = () => {
+    if (isMobile()) {
+      // On mobile, open X profile instead of generating image
+      window.open('https://x.com/deepugami', '_blank')
+    } else {
+      // On desktop, generate and share image
+      generateAndShareImage()
+    }
+  }
+
   const generateAndShareImage = async () => {
     if (!shareCardRef.current || isGeneratingImage) return
     
@@ -140,7 +156,7 @@ export function ResultsDisplay({ analysis, onReset }: ResultsDisplayProps) {
         onClose={() => setShowToast(false)} 
       />
 
-      <div className="w-full max-w-4xl mx-auto space-y-8 xs:space-y-12 sm:space-y-16 px-4 mb-12">
+      <div className="w-full max-w-4xl mx-auto space-y-8 xs:space-y-12 sm:space-y-16 px-4 mb-12 component-container">
       {/* Header Section */}
       <div className="text-center space-y-6 xs:space-y-8 sm:space-y-12">
         <div className="bg-white/10 backdrop-blur-sm border border-white/20 p-8 xs:p-10 sm:p-12">
@@ -150,8 +166,8 @@ export function ResultsDisplay({ analysis, onReset }: ResultsDisplayProps) {
           
           <div className="flex flex-col items-center justify-center gap-2 xs:gap-3 sm:gap-4 text-white/80">
             <span className="text-sm xs:text-base sm:text-lg">Wallet:</span>
-            <div className="flex items-center gap-3">
-              <code className="bg-white/10 px-3 xs:px-4 py-2 font-mono text-sm sm:text-base break-all">
+            <div className="flex items-center justify-center gap-3">
+              <code className="bg-white/10 px-3 xs:px-4 py-2 font-mono text-xs xs:text-sm sm:text-base whitespace-nowrap text-center">
                 {formatAddress(analysis.walletAddress)}
               </code>
               <Button
@@ -179,16 +195,18 @@ export function ResultsDisplay({ analysis, onReset }: ResultsDisplayProps) {
                 </p>
                 
                 {/* Share Button */}
-                <Button
-                  onClick={generateAndShareImage}
-                  disabled={isGeneratingImage}
-                  className="bg-black hover:bg-gray-800 text-white border-0 px-4 xs:px-6 py-2 xs:py-3 rounded-none font-semibold text-xs xs:text-sm sm:text-base flex items-center gap-2 xs:gap-3 mx-auto transition-all duration-200 disabled:opacity-50 min-w-[120px] xs:min-w-[140px] sm:min-w-[160px]"
-                >
-                  <TwitterIcon size={16} className="xs:w-[18px] xs:h-[18px] sm:w-5 sm:h-5" />
-                  <span className="whitespace-nowrap">
-                    {isGeneratingImage ? 'GENERATING...' : 'SHARE'}
-                  </span>
-                </Button>
+                <div className="flex justify-center">
+                  <Button
+                    onClick={handleShareClick}
+                    disabled={isGeneratingImage}
+                    className="bg-black hover:bg-gray-800 text-white border-0 px-4 xs:px-6 py-2 xs:py-3 rounded-none font-semibold text-xs xs:text-sm sm:text-base flex items-center justify-center gap-2 xs:gap-3 transition-all duration-200 disabled:opacity-50 min-w-[120px] xs:min-w-[140px] sm:min-w-[160px]"
+                  >
+                    <TwitterIcon size={16} className="xs:w-[18px] xs:h-[18px] sm:w-5 sm:h-5" />
+                    <span className="whitespace-nowrap">
+                      {isGeneratingImage ? 'GENERATING...' : 'SHARE'}
+                    </span>
+                  </Button>
+                </div>
               </div>
             </div>
           ) : (
@@ -203,16 +221,18 @@ export function ResultsDisplay({ analysis, onReset }: ResultsDisplayProps) {
                 </p>
                 
                 {/* Share Button for Ineligible */}
-                <Button
-                  onClick={generateAndShareImage}
-                  disabled={isGeneratingImage}
-                  className="bg-black hover:bg-gray-800 text-white border-0 px-4 xs:px-6 py-2 xs:py-3 rounded-none font-semibold text-xs xs:text-sm sm:text-base flex items-center gap-2 xs:gap-3 mx-auto transition-all duration-200 disabled:opacity-50 min-w-[120px] xs:min-w-[140px] sm:min-w-[160px]"
-                >
-                  <TwitterIcon size={16} className="xs:w-[18px] xs:h-[18px] sm:w-5 sm:h-5" />
-                  <span className="whitespace-nowrap">
-                    {isGeneratingImage ? 'GENERATING...' : 'SHARE'}
-                  </span>
-                </Button>
+                <div className="flex justify-center">
+                  <Button
+                    onClick={handleShareClick}
+                    disabled={isGeneratingImage}
+                    className="bg-black hover:bg-gray-800 text-white border-0 px-4 xs:px-6 py-2 xs:py-3 rounded-none font-semibold text-xs xs:text-sm sm:text-base flex items-center justify-center gap-2 xs:gap-3 transition-all duration-200 disabled:opacity-50 min-w-[120px] xs:min-w-[140px] sm:min-w-[160px]"
+                  >
+                    <TwitterIcon size={16} className="xs:w-[18px] xs:h-[18px] sm:w-5 sm:h-5" />
+                    <span className="whitespace-nowrap">
+                      {isGeneratingImage ? 'GENERATING...' : 'SHARE'}
+                    </span>
+                  </Button>
+                </div>
               </div>
             </div>
           )}

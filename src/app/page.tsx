@@ -52,7 +52,7 @@ export default function Home() {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center text-center py-4 sm:py-8">
+    <div className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center text-center py-4 sm:py-8 component-container">
       {/* Header */}
       <div className="mb-16 sm:mb-20 md:mb-24 w-full text-center">
         <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 sm:mb-8 md:mb-10 tracking-tight px-2">

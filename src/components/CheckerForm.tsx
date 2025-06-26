@@ -62,7 +62,7 @@ export function CheckerForm({ onSubmit, isLoading, error }: CheckerFormProps) {
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-4 mb-12">
+    <div className="w-full max-w-2xl mx-auto px-4 mb-12 component-container">
       <div className="bg-white/10 backdrop-blur-sm border border-white/20 p-8 xs:p-10 sm:p-12">
         <form onSubmit={handleSubmit} className="space-y-8 xs:space-y-10 sm:space-y-12">
           {/* Wallet Address Input */}

@@ -21,6 +21,17 @@ body {
   height: 100%;
 }
 
+/* Scale only the main content components, not the entire page */
+.component-container {
+  transform: scale(0.95);
+  transform-origin: center;
+}
+
+/* Adjust for scale to prevent content cutoff */
+main {
+  min-height: 100vh;
+}
+
 /* Minimalistic Typography */
 h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
