@@ -1,7 +1,6 @@
 {
   "version": 2,
   "name": "caldera-checker",
-  "regions": ["iad1", "sfo1"],
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "installCommand": "npm install --frozen-lockfile",
@@ -9,7 +8,7 @@
   
   "functions": {
     "app/**": {
-      "maxDuration": 30
+      "maxDuration": 10
     }
   },
   
