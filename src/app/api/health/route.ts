@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 
+// Deployment trigger: 2025-06-27 - Force Vercel redeploy
 export async function GET() {
   try {
     // Basic health check
