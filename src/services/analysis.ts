@@ -82,6 +82,12 @@ export class CalderaAnalysisService {
       }
     } catch (error) {
       console.error('Analysis error:', error)
+      
+      // Check if it's an RPC failure rate error
+      if (error instanceof Error && error.message.includes('RPC_FAILURE_RATE_HIGH')) {
+        throw new Error('NETWORK_ISSUES: Multiple RPC endpoints are currently unavailable. Please try again in a few minutes.')
+      }
+      
       throw new Error(`Analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }

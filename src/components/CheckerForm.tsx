@@ -79,6 +79,13 @@ export function CheckerForm({ onSubmit, isLoading, error }: CheckerFormProps) {
               onChange={(e) => setWalletAddress(e.target.value)}
               className="bg-white/10 border-white/30 text-white placeholder-white/50 h-12 xs:h-14 text-base xs:text-lg sm:text-xl focus:bg-white/20 focus:border-white/50 transition-all w-full text-center rounded-none"
               disabled={isLoading}
+              autoComplete="off"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck="false"
+              inputMode="text"
+              // Mobile optimization: prevent zoom on focus
+              style={{ fontSize: '16px' }}
             />
           </div>
 
@@ -127,8 +134,33 @@ export function CheckerForm({ onSubmit, isLoading, error }: CheckerFormProps) {
 
           {/* Submission Error */}
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 p-5 xs:p-6 text-center">
-              <p className="text-red-200 text-sm xs:text-base">{error}</p>
+            <div className={`border p-5 xs:p-6 text-center ${
+              error.includes('Unable to fetch complete blockchain data') || error.includes('network conditions improve')
+                ? 'bg-yellow-500/10 border-yellow-500/30' 
+                : 'bg-red-500/10 border-red-500/30'
+            }`}>
+              {error.includes('Unable to fetch complete blockchain data') || error.includes('network conditions improve') ? (
+                <div>
+                  <h4 className="text-yellow-300 font-semibold mb-3 text-base xs:text-lg">⚠️ Network Issues Detected</h4>
+                  <p className="text-yellow-200 text-sm xs:text-base mb-3">
+                    Unable to fetch complete blockchain data from all Caldera networks. This may be due to:
+                  </p>
+                  <ul className="text-yellow-200/80 text-xs xs:text-sm space-y-1 mb-4 text-left max-w-md mx-auto">
+                    <li>• High network traffic on RPC endpoints</li>
+                    <li>• Temporary blockchain node issues</li>
+                    <li>• CORS restrictions or firewall blocks</li>
+                    <li>• Rate limiting from providers</li>
+                  </ul>
+                  <p className="text-yellow-300 font-medium text-sm xs:text-base mb-3">
+                    🔄 Please try again in a few minutes when network conditions improve.
+                  </p>
+                  <p className="text-yellow-200/70 text-xs">
+                    We require complete data from all networks to ensure accurate allocation calculations.
+                  </p>
+                </div>
+              ) : (
+                <p className="text-red-200 text-sm xs:text-base">{error}</p>
+              )}
             </div>
           )}
 

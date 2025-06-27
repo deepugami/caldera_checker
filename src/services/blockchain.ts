@@ -50,8 +50,9 @@ export class CalderaBlockchainService {
       chainBreakdown: []
     }
 
-    // Use mainnet chains for production analysis (can include testnet for development)
+    // Try to get real data first - track RPC failure rate
     const chainsToAnalyze = this.getMainnetChains()
+    const totalChains = chainsToAnalyze.length
     
     const chainMetrics = await Promise.allSettled(
       chainsToAnalyze.map(chain => 
@@ -61,11 +62,14 @@ export class CalderaBlockchainService {
 
     let totalBalanceWei = BigInt(0)
     const usedChains = new Set<string>()
+    let successfulRpcs = 0
+    let failedRpcs = 0
 
     chainMetrics.forEach((result, index) => {
       const chainName = chainsToAnalyze[index].name
       
       if (result.status === 'fulfilled' && result.value) {
+        successfulRpcs++
         const rawChainMetric = result.value
         
         // Validate and cap unrealistic values
@@ -91,11 +95,11 @@ export class CalderaBlockchainService {
           nativeTokenSymbol: chainMetric.nativeTokenSymbol || 'ETH',
           isActive
         })
-      } else if (result.status === 'rejected') {
-        // Silently handle RPC failures (CORS/network errors are expected)
+      } else {
+        failedRpcs++
         // Only log in development mode
         if (process.env.NODE_ENV === 'development') {
-          console.warn(`RPC unavailable for ${chainName} (using fallback data)`)
+          console.warn(`RPC unavailable for ${chainName}`)
         }
         
         // Add failed chain to breakdown with zero values
@@ -110,37 +114,14 @@ export class CalderaBlockchainService {
       }
     })
 
+    // If ANY RPCs failed, throw an error to ensure accurate data only
+    // We want to avoid showing incorrect/partial allocations to users
+    if (failedRpcs > 0) {
+      throw new Error(`Unable to fetch complete blockchain data from all networks. Please try again in a few minutes when network conditions improve. (${successfulRpcs}/${totalChains} networks responded)`)
+    }
+
     metrics.totalBalance = ethers.formatEther(totalBalanceWei)
     metrics.uniqueChainsUsed = usedChains.size
-
-    // If no RPC data available, provide fallback data for demo
-    if (metrics.totalTransactions === 0 && usedChains.size === 0) {
-      // Only log in development mode
-      if (process.env.NODE_ENV === 'development') {
-        console.info('Using demo data - RPC endpoints may be unavailable due to CORS restrictions')
-      }
-      metrics.totalTransactions = 25
-      metrics.uniqueChainsUsed = 4
-      metrics.totalBalance = '0.125'
-      metrics.totalGasSpent = 0.08
-      metrics.bridgeTransactions = 8
-      metrics.swapTransactions = 12
-      metrics.stakingTransactions = 3
-      metrics.liquidityTransactions = 2
-      metrics.chainBreakdown = [
-        { chainName: 'Manta Pacific', transactionCount: 8, balance: '0.045', nativeBalance: '0.045', nativeTokenSymbol: 'ETH', isActive: true },
-        { chainName: 'B3', transactionCount: 7, balance: '0.035', nativeBalance: '0.035', nativeTokenSymbol: 'ETH', isActive: true },
-        { 
-          chainName: 'ApeChain', 
-          transactionCount: 6, 
-          balance: GAS_CONVERSION_UTILS.convertToEthEquivalent(62.5, 33139).toString(), // 62.5 APE to ETH equivalent
-          nativeBalance: '62.5', 
-          nativeTokenSymbol: 'APE', 
-          isActive: true 
-        },
-        { chainName: 'Kinto', transactionCount: 4, balance: '0.020', nativeBalance: '0.020', nativeTokenSymbol: 'ETH', isActive: true }
-      ]
-    }
 
     return metrics
   }

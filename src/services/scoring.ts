@@ -48,6 +48,15 @@ export class ScoringService {
     const rawTokenAmount = baseAllocation + onChainBonus + activityBonus
     const tokenAmount = Math.min(Math.round(rawTokenAmount), ALLOCATION_FORMULA.maxAllocation)
     
+    // Debug logging for allocation calculation
+    console.log(`📊 Allocation breakdown:`)
+    console.log(`  🎭 Best role: '${bestRole}' → ${baseAllocation} base tokens`)
+    console.log(`  ⛓️ On-chain score: ${Math.round(onChainScore)} points`)
+    console.log(`  🔥 Role multiplier: ${roleMultiplier}x`)
+    console.log(`  💰 On-chain bonus: ${Math.round(onChainBonus)} tokens`)
+    console.log(`  🚀 Activity bonus: ${Math.round(activityBonus)} tokens`)
+    console.log(`  🎯 Final allocation: ${tokenAmount} tokens`)
+    
     // Calculate normalized score for display (0-100 scale)
     const normalizedScore = Math.min((tokenAmount / 1000) * 10, 100) // Rough conversion for display
     
@@ -83,12 +92,19 @@ export class ScoringService {
     
     for (const role of roles) {
       const value = (baseAllocationByRole as Record<string, number>)[role.name] || baseAllocationByRole.default
+      
+      // Log if role name not found in allocation config (debug mode)
+      if (value === baseAllocationByRole.default && role.name !== 'default') {
+        console.warn(`⚠️ Role '${role.name}' not found in baseAllocationByRole config, using default (0)`)
+      }
+      
       if (value > bestValue) {
         bestValue = value
         bestRole = role.name
       }
     }
     
+    console.log(`🎯 Best role selected: '${bestRole}' with ${bestValue} base tokens`)
     return bestRole
   }
 
@@ -103,22 +119,30 @@ export class ScoringService {
     
     // Get multipliers for all roles, sort by highest, take top N
     const multipliers = roles
-      .map(role => (roleMultipliers as Record<string, number>)[role.name] || roleMultipliers.default)
+      .map(role => {
+        const multiplier = (roleMultipliers as Record<string, number>)[role.name] || roleMultipliers.default
+        console.log(`  🎭 Role '${role.name}' → ${multiplier}x multiplier`)
+        return multiplier
+      })
       .sort((a, b) => b - a)
       .slice(0, maxRolesConsidered)
     
     if (multipliers.length === 1) {
+      console.log(`  🔢 Single role multiplier: ${multipliers[0]}x`)
       return multipliers[0]
     }
     
     // For multiple roles: Use best multiplier + bonus for additional roles
     const bestMultiplier = multipliers[0]
     const additionalRolesBonus = multipliers.slice(1).reduce((bonus, mult) => {
-      // Each additional role adds 20% of its multiplier value as bonus
+      // Each additional role adds 90% of its multiplier value as bonus
       return bonus + (mult * 0.9)
     }, 0)
     
-    return bestMultiplier + additionalRolesBonus
+    const totalMultiplier = bestMultiplier + additionalRolesBonus
+    console.log(`  🔢 Multi-role multiplier: ${bestMultiplier}x + ${additionalRolesBonus.toFixed(2)}x bonus = ${totalMultiplier.toFixed(2)}x`)
+    
+    return totalMultiplier
   }
 
   /**

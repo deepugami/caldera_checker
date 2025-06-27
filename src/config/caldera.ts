@@ -143,6 +143,7 @@ export const DEFAULT_RPC_CONFIG = {
 // Gas token conversion configuration for proper ETH equivalent calculations
 export const GAS_TOKEN_CONFIG = {
   // Native token to ETH conversion rates (for gas calculations)
+  // Note: Live rates are fetched via API for production, static rates for demo consistency
   conversionRates: {
     'ETH': 1.0,     // ETH to ETH = 1:1
     'APE': 0.001,   // APE to ETH approximate rate (should be updated from API)
@@ -232,17 +233,15 @@ export const ALLOCATION_CONFIG = {
   
   // New hybrid system: Discord roles as multipliers + base allocations
   baseAllocationByRole: {
+    // [T-1] Regional Champion - Highest tier (local ops legends)
+    'Regional Champion': 8000, // Local ops legends running Twitter, events, vibes - HIGHEST ROLE
+    
     // [T-1] Core Contributors - Legendary tier
+    'OG': 6000,             // Day-one believers, still respected
+    'cder-mafia': 5000,     // 2022-era server boosters, early frens
     'hero': 4800,           // Storytellers, creatives, community leaders
     'Titan': 4500,          // Technical writers, developers, contributors
     'maestro': 4200,        // Creative leads, artists, stylists, lore crafters
-    
-    // Retired/Legacy Roles - Respected OGs
-    'OG': 6000,             // Day-one believers, still respected
-    'cder-mafia': 5000,     // 2022-era server boosters, early frens
-    
-    // Regional/Special Operations
-    'Regional Champion': 8000, // Local ops legends running Twitter, events, vibes
     
     // [T-2] Active Contributors - Reliable tier  
     'cder': 2500,           // Go-to regulars, always active, always helping
@@ -254,17 +253,13 @@ export const ALLOCATION_CONFIG = {
     'Twitter Champion': 800,    // 4444 pts - good engagement  
     'Twitter Supporter': 500,   // 2222 pts - decent engagement
     
-    // Discord XP Roles - Activity tier
-    'tion': 600,            // Level 18+ discord activity
-    'ash': 400,             // Level 9+ discord activity
-    
     // Special Achievement Roles
     'poker TWR': 800,      // Went all in and won
     'meme-lord': 800,       // Meme dealer, chaos bringer
     
-    // [T-3] Community Members - Standard tier
-    'calderan': 300,        // Active community member
-    'newbies': 150,         // Fresh spawn, just getting started
+    // Discord XP Roles - Activity tier
+    'tion': 600,            // Level 18+ discord activity
+    'ash': 400,             // Level 9+ discord activity
     
     // No Discord Roles option
     'No Discord Roles': 0,  // For users without roles
@@ -275,39 +270,33 @@ export const ALLOCATION_CONFIG = {
   
   // Role multipliers for on-chain activity (stacks with base allocation)
   roleMultipliers: {
-    // [T-1] Core Contributors - 4x-5x multiplier
-    'hero': 3.5,
-    'Titan': 3.5, 
-    'maestro': 3.5,
+    // [T-1] Regional Champion - Highest multiplier (5x)
+    'Regional Champion': 5.0,   // HIGHEST ROLE - Local ops legends
     
-    // Retired/Legacy Roles - 3x-4x multiplier
-    'OG': 4.0,
-    'cder-mafia': 3.5,
-    
-    // Regional/Special Operations - 5x multiplier
-    'Regional Champion': 5.0,
+    // [T-1] Core Contributors - 3.5x-4x multiplier
+    'OG': 4.0,                  // Day-one believers
+    'cder-mafia': 3.5,          // Early server boosters
+    'hero': 3.5,                // Community leaders
+    'Titan': 3.5,               // Technical contributors
+    'maestro': 3.5,             // Creative leads
     
     // [T-2] Active Contributors - 2x-2.5x multiplier
-    'cder': 2.5,
-    'core': 2.5,
-    'young-cder': 2.0,
+    'cder': 2.5,                // Go-to regulars
+    'core': 2.5,                // Builders and organizers
+    'young-cder': 2.0,          // Rising stars
     
     // Twitter Activity Roles - 1.5x-2x multiplier
-    'Twitter Degen': 2.0,
-    'Twitter Champion': 1.8,
-    'Twitter Supporter': 1.5,
+    'Twitter Degen': 2.0,       // High engagement
+    'Twitter Champion': 1.8,    // Good engagement
+    'Twitter Supporter': 1.5,   // Decent engagement
+    
+    // Special Achievement Roles - 2x multiplier
+    'poker TWR': 2.0,           // All-in winners
+    'meme-lord': 2.0,           // Chaos bringers
     
     // Discord XP Roles - 1.3x-1.5x multiplier
-    'tion': 1.5,
-    'ash': 1.3,
-    
-    // Special Achievement Roles - 1.5x-2x multiplier
-    'poker TWR': 2.0,
-    'meme-lord': 2.0,
-    
-    // [T-3] Community Members - 1.2x-1.3x multiplier
-    'calderan': 1.3,
-    'newbies': 1.2,
+    'tion': 1.5,                // Level 18+ activity
+    'ash': 1.3,                 // Level 9+ activity
     
     // No Discord Roles option
     'No Discord Roles': 1.0,
@@ -324,22 +313,22 @@ export const ALLOCATION_CONFIG = {
     minBalance: 0            // No minimum balance requirement
   },
   
-  // On-chain activity scoring (base score before role multipliers)
+  // On-chain activity scoring (reduced by 70% for more conservative allocations)
   onChainScoring: {
-    // More generous base scoring
-    transactionWeight: 2,        // 2 points per transaction
-    bridgeWeight: 45,            // 45 points per bridge transaction
-    swapWeight: 15,              // 15 points per swap
-    stakingWeight: 40,           // 40 points per staking transaction  
-    liquidityWeight: 30,         // 30 points per LP transaction
-    chainDiversityWeight: 100,   // 100 points per unique chain
-    balanceWeight: 50,         // 2500 points per ETH equivalent balance
+    // Reduced base scoring weights
+    transactionWeight: 0.6,      // 0.6 points per transaction (was 2)
+    bridgeWeight: 14,            // 14 points per bridge transaction (was 45)
+    swapWeight: 5,               // 5 points per swap (was 15)
+    stakingWeight: 12,           // 12 points per staking transaction (was 40)
+    liquidityWeight: 9,          // 9 points per LP transaction (was 30)
+    chainDiversityWeight: 30,    // 30 points per unique chain (was 100)
+    balanceWeight: 15,           // 15 points per ETH equivalent balance (was 50)
     
-    // Bonus thresholds (all values in ETH equivalent)
+    // Reduced bonus thresholds 
     powerUserBonus: {
-      transactions: { threshold: 500, bonus: 100 },    // 500+ transactions for bonus
-      chains: { threshold: 5, bonus: 200 },
-      balance: { threshold: 0.1, bonus: 150 }
+      transactions: { threshold: 500, bonus: 30 },     // 30 bonus (was 100)
+      chains: { threshold: 5, bonus: 60 },             // 60 bonus (was 200)
+      balance: { threshold: 0.1, bonus: 45 }           // 45 bonus (was 150)
     }
   }
 }
@@ -363,9 +352,9 @@ export const ALLOCATION_FORMULA = {
   multiRoleStrategy: 'best', // Use best role's base + average multiplier
   maxRolesConsidered: 3,     // Consider top 3 roles maximum
   
-  // Activity bonus scaling
+  // Activity bonus scaling (reduced)
   activityBonusEnabled: true,
-  activityBonusMultiplier: 1.5 // Additional 50% for high activity users
+  activityBonusMultiplier: 1.15 // Additional 15% for high activity users (was 1.5 = 50%)
 }
 
 // Gas token conversion utilities

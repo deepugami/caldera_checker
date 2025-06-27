@@ -1,10 +1,36 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
+/* Mobile-first optimizations */
 * {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Disable any scroll-based transforms that might affect background */
+*,
+*::before,
+*::after {
+  /* Prevent any unwanted scroll effects */
+  scroll-margin: 0;
+  scroll-padding: 0;
+}
+
+html {
+  /* Prevent zoom on input focus on iOS */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Smooth scrolling for better mobile UX */
+  scroll-behavior: smooth;
+  /* Optimize font rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 html,
@@ -19,12 +45,42 @@ body {
   padding: 0;
   width: 100%;
   height: 100%;
+  /* Improve touch interactions */
+  touch-action: manipulation;
+  /* Optimize for mobile performance */
+  will-change: auto;
+  /* Ensure background is always fixed during scroll */
+  background-attachment: fixed;
+  position: relative;
 }
 
-/* Scale only the main content components, not the entire page */
+/* Better mobile input handling */
+input, button, textarea {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Mobile-responsive scaling */
 .component-container {
   transform: scale(0.95);
   transform-origin: center;
+  /* Optimize for mobile performance */
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Responsive scaling for different screen sizes */
+@media (max-width: 480px) {
+  .component-container {
+    transform: scale(0.9);
+  }
+}
+
+@media (min-width: 1200px) {
+  .component-container {
+    transform: scale(1);
+  }
 }
 
 /* Ensure toast notifications are always fixed to viewport regardless of parent transforms */
@@ -46,6 +102,48 @@ body {
 /* Adjust for scale to prevent content cutoff */
 main {
   min-height: 100vh;
+}
+
+/* Ensure background elements stay fixed during scroll */
+.fixed-background {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background-attachment: fixed !important;
+  /* Prevent any transform or movement during scroll */
+  transform: none !important;
+  will-change: auto !important;
+  z-index: -1 !important;
+}
+
+/* Override any potential scroll effects on background */
+.fixed-background * {
+  position: static !important;
+  transform: none !important;
+  will-change: auto !important;
+}
+
+/* Prevent any background elements from moving during scroll */
+[style*="background-image"],
+[class*="bg-gradient"] {
+  background-attachment: fixed !important;
+}
+
+/* Ensure all background layers remain static during scroll */
+div[class*="fixed"],
+div[class*="absolute"] {
+  will-change: auto !important;
+}
+
+/* Extra safety for gradient backgrounds to prevent scroll movement */
+.bg-gradient-to-br,
+.bg-gradient-to-b,
+.bg-gradient-to-r,
+.bg-gradient-to-l,
+.bg-gradient-to-t {
+  background-attachment: fixed !important;
 }
 
 /* Minimalistic Typography */

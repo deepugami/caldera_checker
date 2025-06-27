@@ -379,6 +379,7 @@ export function ResultsDisplay({ analysis, onReset, onShowToast }: ResultsDispla
         <p className="text-white/60 text-sm xs:text-base leading-relaxed">
           <strong>Disclaimer:</strong> This is an unofficial checker for demonstration purposes. 
           Actual token allocation criteria may differ significantly from these estimates.
+          All data shown is based on real blockchain metrics from Caldera networks.
         </p>
       </div>
       </div>

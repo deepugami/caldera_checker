@@ -75,7 +75,14 @@ export const DISCORD_ROLES: DiscordRole[] = [
   {
     id: 'ash',
     name: 'ash',
-    points: 300
+    points: 400  // Updated to match allocation config
+  },
+  
+  // Sixth tier - Discord XP high tier
+  {
+    id: 'tion',
+    name: 'tion',
+    points: 600
   },
   
   // Seventh tier - Special roles
